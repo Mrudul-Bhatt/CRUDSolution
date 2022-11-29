@@ -1,3 +1,5 @@
+using Entities;
+using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using Services;
 
@@ -5,9 +7,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-//add services to IoC container
-builder.Services.AddSingleton<ICountriesService, CountriesService>();
-builder.Services.AddSingleton<IPersonsService, PersonsService>();
+//Add services to IoC container
+
+//Since we are using In-Memory Collection so to persist it we are creating a Singleton service
+//builder.Services.AddSingleton<ICountriesService, CountriesService>();
+//builder.Services.AddSingleton<IPersonsService, PersonsService>();
+
+//Now we are using a SqlServer DB so use Scoped service
+builder.Services.AddScoped<ICountriesService, CountriesService>();
+builder.Services.AddScoped<IPersonsService, PersonsService>();
+
+//Add DbContext as a service
+
+//These options params will be supplied to the DbContext constructor class via child constructor
+//This is by default will be a Scoped Service
+builder.Services.AddDbContext<PersonsDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

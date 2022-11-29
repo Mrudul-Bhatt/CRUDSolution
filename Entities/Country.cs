@@ -1,4 +1,6 @@
-﻿namespace Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Entities
 {
     /// <summary>
     /// This is model and should be in seperate project and it should not directly deal with controllers 
@@ -6,6 +8,8 @@
     /// </summary>
     public class Country
     {
+        //Primary Key Annotation
+        [Key]
         public Guid CountryID { get; set; }
         public string? CountryName { get; set; }
     }
