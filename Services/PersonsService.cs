@@ -1,5 +1,6 @@
 ﻿using System;
 using Entities;
+using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -19,12 +20,14 @@ namespace Services
             _countriesService = countriesService;
         }
 
-        private PersonResponse ConvertPersonToPersonResponse(Person person)
-        {
-            PersonResponse personResponse = person.ToPersonResponse();
-            personResponse.Country = _countriesService.GetCountryById(person.CountryID)?.CountryName;
-            return personResponse;
-        }
+        //private PersonResponse ConvertPersonToPersonResponse(Person person)
+        //{
+        //    PersonResponse personResponse = person.ToPersonResponse();
+        //    //personResponse.Country = _countriesService.GetCountryById(person.CountryID)?.CountryName;
+        //    personResponse.Country = person.Country?.CountryName;
+
+        //    return personResponse;
+        //}
 
         public PersonResponse AddPerson(PersonAddRequest? personAddRequest)
         {
@@ -44,26 +47,32 @@ namespace Services
             person.PersonID = Guid.NewGuid();
 
             //add person object to persons list
-            //_db.Persons.Add(person);
+            _db.Persons.Add(person);
 
             //save changes to database
-            //_db.SaveChanges();
+            _db.SaveChanges();
 
-            _db.sp_InsertPerson(person);
+            //SP for adding person to database
+            //_db.sp_InsertPerson(person);
 
             //convert the Person object into PersonResponse type
-            return ConvertPersonToPersonResponse(person);
+            return person.ToPersonResponse();
         }
 
         public List<PersonResponse> GetAllPersons()
         {
+            //fetching navigation property also
+            //The value "Country" here is the value of Navigation Property 
+            var persons = _db.Persons.Include("Country").ToList();
+
             //we can use user defined methods when using in memory collections but can't execute them in database LINQ
             //return _db.Persons.Select(person => ConvertPersonToPersonResponse(person)).ToList();
 
             //so in order to make LINQ compatible with our user defined methods we need to use ToList() method immediatley after accessing the table collection
-            //return _db.Persons.ToList().Select(person => ConvertPersonToPersonResponse(person)).ToList();
+            return persons.ToList().Select(person => person.ToPersonResponse()).ToList();
 
-            return _db.sp_GetAllPersons().Select(person => ConvertPersonToPersonResponse(person)).ToList();
+            //Stored Procedure for getting all persons
+            //return _db.sp_GetAllPersons().Select(person => ConvertPersonToPersonResponse(person)).ToList();
         }
 
         public PersonResponse? GetPersonById(Guid? personId)
@@ -75,7 +84,7 @@ namespace Services
             if (person == null)
                 return null;
 
-            return ConvertPersonToPersonResponse(person);
+            return person.ToPersonResponse();
         }
 
         public List<PersonResponse> GetFilteredPersons(string searchBy, string? searchString)
@@ -202,7 +211,7 @@ namespace Services
             //save changes to db
             _db.SaveChanges();
 
-            return ConvertPersonToPersonResponse(matchingPerson);
+            return matchingPerson.ToPersonResponse();
         }
 
         public bool DeletePerson(Guid? personID)

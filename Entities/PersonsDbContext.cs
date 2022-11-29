@@ -65,6 +65,20 @@ namespace Entities
             foreach (Person person in persons)
                 modelBuilder.Entity<Person>().HasData(person);
 
+            //Fluent API to change TIN Column
+            //Column TIN will be called with this name in code but its value in DB will be TaxIdentificationNumber
+            modelBuilder.Entity<Person>().Property(p => p.TIN)
+                .HasColumnName("TaxIdentificationNumber")
+                .HasColumnType("varchar(8)")
+                .HasDefaultValue("ABC12345");
+
+            //Fluent API to change constraints on TIN Colums
+
+            //modelBuilder.Entity<Person>().HasIndex(temp => temp.TIN).IsUnique();
+
+            //This condition will be check for every insertion and updation
+            modelBuilder.Entity<Person>().HasCheckConstraint("CHK_TIN", "len([TaxIdentificationNumber]) = 8");
+
         }
 
         public List<Person>? sp_GetAllPersons()

@@ -12,5 +12,8 @@ namespace Entities
         [Key]
         public Guid CountryID { get; set; }
         public string? CountryName { get; set; }
+
+        //Navigation Property to Person Table : These properties are null by default
+        //public virtual ICollection<Person>? Persons { get; set; }
     }
 }
