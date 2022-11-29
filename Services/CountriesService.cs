@@ -9,10 +9,10 @@ namespace Services
     {
         //In-Memory Collection
         //private readonly List<Country> _countries;
-        private readonly PersonsDbContext _db;
+        private readonly ApplicationDbContext _db;
 
 
-        public CountriesService(PersonsDbContext personsDbContext)
+        public CountriesService(ApplicationDbContext personsDbContext)
         {
             //_countries = new List<Country>();
             _db = personsDbContext;

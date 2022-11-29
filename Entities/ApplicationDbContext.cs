@@ -9,15 +9,16 @@ using System.Threading.Tasks;
 namespace Entities
 {
     //DbContext is present in NuGet Package Microsoft.EntityFrameworkCore.SqlServer, so in order to use it, we need to install it
-    public class PersonsDbContext : DbContext
+    public class ApplicationDbContext : DbContext
     {
         //This is the constructor of the class to provide the options we used in Program.cs (such as use SqlServer as DB) to Parent DbContext class
-        public PersonsDbContext(DbContextOptions<PersonsDbContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        public DbSet<Country>? Countries { get; set; }
-        public DbSet<Person>? Persons { get; set; }
+        //make dbset virtual in order for it to be mockable as mocking requires the dbset value to be overrided by the mock, without virtual it cannot override this value
+        public virtual DbSet<Country>? Countries { get; set; }
+        public virtual DbSet<Person>? Persons { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

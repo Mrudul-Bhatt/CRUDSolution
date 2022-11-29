@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using EntityFrameworkCoreMock;
 
 namespace CRUDTests
 {
@@ -23,9 +24,24 @@ namespace CRUDTests
         //constructor
         public PersonsServiceTest(ITestOutputHelper testOutputHelper)
         {
-            _countriesService = new CountriesService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options));
+            var countriesInitialData = new List<Country>() { };
+            var personsInitialData = new List<Person>() { };
 
-            _personService = new PersonsService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options), _countriesService);
+            DbContextMock<ApplicationDbContext> dbContextMock = new DbContextMock<ApplicationDbContext>(
+                    new DbContextOptionsBuilder<ApplicationDbContext>().Options
+                );
+
+            ApplicationDbContext dbContext = dbContextMock.Object;
+
+            dbContextMock.CreateDbSetMock(temp => temp.Countries, countriesInitialData);
+            dbContextMock.CreateDbSetMock(temp => temp.Persons, personsInitialData);
+
+            _countriesService = new CountriesService(dbContext);
+            _personService = new PersonsService(dbContext, _countriesService);
+
+            //_countriesService = new CountriesService(new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>().Options));
+
+            //_personService = new PersonsService(new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>().Options), _countriesService);
 
             _testOutputHelper = testOutputHelper;
         }
@@ -400,7 +416,7 @@ namespace CRUDTests
             CountryAddRequest country_add_request = new CountryAddRequest() { CountryName = "UK" };
             CountryResponse country_response_from_add = await _countriesService.AddCountry(country_add_request);
 
-            PersonAddRequest person_add_request = new PersonAddRequest() { PersonName = "John", CountryID = country_response_from_add.CountryID, Email = "john@example.com", Address = "address...", Gender = GenderOptions.Male };
+            PersonAddRequest person_add_request = new PersonAddRequest() { PersonName = "John", CountryID = country_response_from_add.CountryID, DateOfBirth = DateTime.Parse("2000-01-01"), Email = "john@example.com", Address = "address...", Gender = GenderOptions.Male };
 
             PersonResponse person_response_from_add = await _personService.AddPerson(person_add_request);
 

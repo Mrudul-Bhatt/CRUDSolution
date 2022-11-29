@@ -21,7 +21,7 @@ builder.Services.AddScoped<IPersonsService, PersonsService>();
 
 //These options params will be supplied to the DbContext constructor class via child constructor
 //This is by default will be a Scoped Service
-builder.Services.AddDbContext<PersonsDbContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
