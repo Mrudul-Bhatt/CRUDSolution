@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +16,8 @@ namespace Entities
         {
         }
 
-        public DbSet<Country> Countries { get; set; }
-        public DbSet<Person> Persons { get; set; }
+        public DbSet<Country>? Countries { get; set; }
+        public DbSet<Person>? Persons { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,7 +52,7 @@ namespace Entities
             //Seed data via JSON file
             //Seed to Countries
             string countriesJson = System.IO.File.ReadAllText("JSONData/countries.json");
-            List<Country> countries = System.Text.Json.JsonSerializer.Deserialize<List<Country>>(countriesJson);
+            List<Country>? countries = System.Text.Json.JsonSerializer.Deserialize<List<Country>>(countriesJson);
 
             foreach (Country country in countries)
                 modelBuilder.Entity<Country>().HasData(country);
@@ -59,11 +60,37 @@ namespace Entities
 
             //Seed to Persons
             string personsJson = System.IO.File.ReadAllText("JSONData/persons.json");
-            List<Person> persons = System.Text.Json.JsonSerializer.Deserialize<List<Person>>(personsJson);
+            List<Person>? persons = System.Text.Json.JsonSerializer.Deserialize<List<Person>>(personsJson);
 
             foreach (Person person in persons)
                 modelBuilder.Entity<Person>().HasData(person);
 
+        }
+
+        public List<Person>? sp_GetAllPersons()
+        {
+            //This returns IQueryable<Person>
+            //return Persons.FromSqlRaw("EXECUTE dbo.sp_GetAllPersons");  
+
+            //This returns IEnumerable<Person>
+            return Persons.FromSqlRaw("EXECUTE [dbo].[GetAllPersons]").ToList();
+        }
+
+        //Returns number of rows affected by the stored procedure
+        public int sp_InsertPerson(Person person)
+        {
+            SqlParameter[] parameters = new SqlParameter[] {
+                new SqlParameter("@PersonID", person.PersonID),
+                new SqlParameter("@PersonName", person.PersonName),
+                new SqlParameter("@Email", person.Email),
+                new SqlParameter("@DateOfBirth", person.DateOfBirth),
+                new SqlParameter("@Gender", person.Gender),
+                new SqlParameter("@CountryID", person.CountryID),
+                new SqlParameter("@Address", person.Address),
+                new SqlParameter("@ReceivesNewsLetters", person.ReceivesNewsLetters)
+            };
+
+            return Database.ExecuteSqlRaw("EXECUTE [dbo].[InsertPerson] @PersonID, @PersonName, @Email, @DateOfBirth, @Gender, @CountryID, @Address, @ReceivesNewsLetters", parameters);
         }
     }
 }

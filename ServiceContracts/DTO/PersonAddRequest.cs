@@ -17,10 +17,13 @@ namespace ServiceContracts.DTO
         public string? Email { get; set; }
 
         [DataType(DataType.Date)]
+        [Required(ErrorMessage = "Date of birth can't be blank")]
         public DateTime? DateOfBirth { get; set; }
 
+        [Required(ErrorMessage = "Gender can't be null")]
         public GenderOptions? Gender { get; set; }
 
+        [Required(ErrorMessage = "Country can't be null")]
         public Guid? CountryID { get; set; }
 
         public string? Address { get; set; }

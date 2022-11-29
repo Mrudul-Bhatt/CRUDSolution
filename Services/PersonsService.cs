@@ -44,10 +44,12 @@ namespace Services
             person.PersonID = Guid.NewGuid();
 
             //add person object to persons list
-            _db.Persons.Add(person);
+            //_db.Persons.Add(person);
 
             //save changes to database
-            _db.SaveChanges();
+            //_db.SaveChanges();
+
+            _db.sp_InsertPerson(person);
 
             //convert the Person object into PersonResponse type
             return ConvertPersonToPersonResponse(person);
@@ -59,7 +61,9 @@ namespace Services
             //return _db.Persons.Select(person => ConvertPersonToPersonResponse(person)).ToList();
 
             //so in order to make LINQ compatible with our user defined methods we need to use ToList() method immediatley after accessing the table collection
-            return _db.Persons.ToList().Select(person => ConvertPersonToPersonResponse(person)).ToList();
+            //return _db.Persons.ToList().Select(person => ConvertPersonToPersonResponse(person)).ToList();
+
+            return _db.sp_GetAllPersons().Select(person => ConvertPersonToPersonResponse(person)).ToList();
         }
 
         public PersonResponse? GetPersonById(Guid? personId)
