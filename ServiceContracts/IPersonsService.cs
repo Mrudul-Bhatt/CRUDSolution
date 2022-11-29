@@ -6,13 +6,13 @@ namespace ServiceContracts
 {
     public interface IPersonsService
     {
-        PersonResponse AddPerson(PersonAddRequest? personAddRequest);
-        List<PersonResponse> GetAllPersons();
-        PersonResponse? GetPersonById(Guid? personId);
-        List<PersonResponse> GetFilteredPersons(string searchBy, string? searchString);
-        List<PersonResponse> GetSortedPersons(List<PersonResponse> allPersons, string sortBy, SortOrderOptions sortOrder);
-        PersonResponse UpdatePerson(PersonUpdateRequest? personUpdateRequest);
-        bool DeletePerson(Guid? personId);
+        Task<PersonResponse> AddPerson(PersonAddRequest? personAddRequest);
+        Task<List<PersonResponse>> GetAllPersons();
+        Task<PersonResponse?> GetPersonById(Guid? personId);
+        Task<List<PersonResponse>> GetFilteredPersons(string searchBy, string? searchString);
+        Task<List<PersonResponse>> GetSortedPersons(List<PersonResponse> allPersons, string sortBy, SortOrderOptions sortOrder);
+        Task<PersonResponse> UpdatePerson(PersonUpdateRequest? personUpdateRequest);
+        Task<bool> DeletePerson(Guid? personId);
     }
 }
 

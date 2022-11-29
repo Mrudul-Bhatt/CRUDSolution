@@ -1,4 +1,5 @@
 ﻿using Entities;
+using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 
@@ -33,7 +34,7 @@ namespace Services
             //}
         }
 
-        public CountryResponse AddCountry(CountryAddRequest? countryAddRequest)
+        public async Task<CountryResponse> AddCountry(CountryAddRequest? countryAddRequest)
         {
             if (countryAddRequest == null)
             {
@@ -46,7 +47,8 @@ namespace Services
             }
 
             //use Any() instead of Count() here for performance 
-            if (_db.Countries.Where(country => country.CountryName == countryAddRequest.CountryName).Any())
+            //using wait means same server thread is also serving other requests without being blocked and also waiting for db response
+            if (await _db.Countries.Where(country => country.CountryName == countryAddRequest.CountryName).AnyAsync())
             {
                 throw new ArgumentException("Country name already exists");
             }
@@ -61,24 +63,24 @@ namespace Services
             _db.Countries.Add(country);
 
             //Important to save our changes to db
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
 
             return country.ToCountryResponse();
         }
 
-        public List<CountryResponse> GetAllCountries()
+        public async Task<List<CountryResponse>> GetAllCountries()
         {
-            return _db.Countries.Select(country => country.ToCountryResponse()).ToList();
+            return await _db.Countries.Select(country => country.ToCountryResponse()).ToListAsync();
         }
 
-        public CountryResponse? GetCountryById(Guid? Id)
+        public async Task<CountryResponse?> GetCountryById(Guid? Id)
         {
             if (Id == null)
             {
                 return null;
             }
 
-            Country? country = _db.Countries.FirstOrDefault(country => country.CountryID == Id);
+            Country? country = await _db.Countries.FirstOrDefaultAsync(country => country.CountryID == Id);
 
             if (country == null)
             {

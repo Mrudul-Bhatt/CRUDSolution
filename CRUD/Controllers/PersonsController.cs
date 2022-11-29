@@ -6,6 +6,7 @@ using ServiceContracts.Enums;
 
 namespace CRUD.Controllers
 {
+    //Controllers need to be of Task type if Business Layer is Task type
     //[Route("[controller]")]
     [Route("persons")]
     public class PersonsController : Controller
@@ -24,7 +25,7 @@ namespace CRUD.Controllers
         //[Route([action])] : We can also use this, this means same as Route("index")
         [Route("index")]
         [Route("/")]
-        public IActionResult Index(string searchBy, string? searchString, string sortBy = nameof(PersonResponse.PersonName), SortOrderOptions sortOrder = SortOrderOptions.ASC)
+        public async Task<IActionResult> Index(string searchBy, string? searchString, string sortBy = nameof(PersonResponse.PersonName), SortOrderOptions sortOrder = SortOrderOptions.ASC)
         {
             //searching
 
@@ -37,14 +38,14 @@ namespace CRUD.Controllers
                 { nameof(PersonResponse.Address), "Address" }
             };
 
-            List<PersonResponse> persons = _personsService.GetFilteredPersons(searchBy, searchString);
+            List<PersonResponse> persons = await _personsService.GetFilteredPersons(searchBy, searchString);
             ViewBag.CurrentSearchBy = searchBy;
             ViewBag.CurrentSearchString = searchString;
             //List<PersonResponse> persons = _personsService.GetAllPersons();
 
             //sorting
 
-            List<PersonResponse> sortedPersons = _personsService.GetSortedPersons(persons, sortBy, sortOrder);
+            List<PersonResponse> sortedPersons = await _personsService.GetSortedPersons(persons, sortBy, sortOrder);
             ViewBag.CurrentSortBy = sortBy;
             ViewBag.CurrentSortOrder = sortOrder.ToString();
 
@@ -53,9 +54,9 @@ namespace CRUD.Controllers
 
         [Route("create")]
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            List<CountryResponse> countries = _countriesService.GetAllCountries();
+            List<CountryResponse> countries = await _countriesService.GetAllCountries();
             //ViewBag.Countries = countries;
 
             ViewBag.Countries = countries.Select(country => new SelectListItem() { Text = country.CountryName, Value = country.CountryID.ToString() });
@@ -67,18 +68,18 @@ namespace CRUD.Controllers
 
         [Route("create")]
         [HttpPost]
-        public IActionResult Create(PersonAddRequest personAddRequest)
+        public async Task<IActionResult> Create(PersonAddRequest personAddRequest)
         {
             if (!ModelState.IsValid)
             {
-                List<CountryResponse> countries = _countriesService.GetAllCountries();
+                List<CountryResponse> countries = await _countriesService.GetAllCountries();
                 ViewBag.Countries = countries;
                 ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 return View();
             }
 
             //business logic
-            _personsService.AddPerson(personAddRequest);
+            await _personsService.AddPerson(personAddRequest);
 
             return RedirectToAction("Index", "Persons");
         }
@@ -86,9 +87,9 @@ namespace CRUD.Controllers
         //Get request to load the Update person view page, first we need to get info regarding the person to be updated
         [HttpGet]
         [Route("[action]/{personID}")] //Eg: /persons/edit/1
-        public IActionResult Edit(Guid personID)
+        public async Task<IActionResult> Edit(Guid personID)
         {
-            PersonResponse? personResponse = _personsService.GetPersonById(personID);
+            PersonResponse? personResponse = await _personsService.GetPersonById(personID);
             if (personResponse == null)
             {
                 return RedirectToAction("Index");
@@ -96,7 +97,7 @@ namespace CRUD.Controllers
 
             PersonUpdateRequest personUpdateRequest = personResponse.ToPersonUpdateRequest();
 
-            List<CountryResponse> countries = _countriesService.GetAllCountries();
+            List<CountryResponse> countries = await _countriesService.GetAllCountries();
             ViewBag.Countries = countries.Select(temp =>
             new SelectListItem() { Text = temp.CountryName, Value = temp.CountryID.ToString() });
 
@@ -106,9 +107,9 @@ namespace CRUD.Controllers
         //Post request to update the person info in the database
         [HttpPost]
         [Route("[action]/{personID}")]
-        public IActionResult Edit(PersonUpdateRequest personUpdateRequest)
+        public async Task<IActionResult> Edit(PersonUpdateRequest personUpdateRequest)
         {
-            PersonResponse? personResponse = _personsService.GetPersonById(personUpdateRequest.PersonID);
+            PersonResponse? personResponse = await _personsService.GetPersonById(personUpdateRequest.PersonID);
 
             if (personResponse == null)
             {
@@ -117,12 +118,12 @@ namespace CRUD.Controllers
 
             if (ModelState.IsValid)
             {
-                PersonResponse updatedPerson = _personsService.UpdatePerson(personUpdateRequest);
+                PersonResponse updatedPerson = await _personsService.UpdatePerson(personUpdateRequest);
                 return RedirectToAction("Index");
             }
             else
             {
-                List<CountryResponse> countries = _countriesService.GetAllCountries();
+                List<CountryResponse> countries = await _countriesService.GetAllCountries();
                 ViewBag.Countries = countries.Select(temp =>
                 new SelectListItem() { Text = temp.CountryName, Value = temp.CountryID.ToString() });
 
@@ -134,9 +135,9 @@ namespace CRUD.Controllers
 
         [HttpGet]
         [Route("[action]/{personID}")]
-        public IActionResult Delete(Guid? personID)
+        public async Task<IActionResult> Delete(Guid? personID)
         {
-            PersonResponse? personResponse = _personsService.GetPersonById(personID);
+            PersonResponse? personResponse = await _personsService.GetPersonById(personID);
             if (personResponse == null)
                 return RedirectToAction("Index");
 
@@ -145,13 +146,13 @@ namespace CRUD.Controllers
 
         [HttpPost]
         [Route("[action]/{personID}")]
-        public IActionResult Delete(PersonUpdateRequest personUpdateResult)
+        public async Task<IActionResult> Delete(PersonUpdateRequest personUpdateResult)
         {
-            PersonResponse? personResponse = _personsService.GetPersonById(personUpdateResult.PersonID);
+            PersonResponse? personResponse = await _personsService.GetPersonById(personUpdateResult.PersonID);
             if (personResponse == null)
                 return RedirectToAction("Index");
 
-            _personsService.DeletePerson(personUpdateResult.PersonID);
+            await _personsService.DeletePerson(personUpdateResult.PersonID);
             return RedirectToAction("Index");
         }
     }
