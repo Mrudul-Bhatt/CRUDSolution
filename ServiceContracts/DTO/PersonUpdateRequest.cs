@@ -25,7 +25,7 @@ namespace ServiceContracts.DTO
         public GenderOptions? Gender { get; set; }
         public Guid? CountryID { get; set; }
         public string? Address { get; set; }
-        public bool ReceiveNewsLetters { get; set; }
+        public bool ReceivesNewsLetters { get; set; }
 
         /// <summary>
         /// Converts the current object of PersonAddRequest into a new object of Person type
@@ -33,7 +33,7 @@ namespace ServiceContracts.DTO
         /// <returns>Returns Person object</returns>
         public Person ToPerson()
         {
-            return new Person() { PersonID = PersonID, PersonName = PersonName, Email = Email, DateOfBirth = DateOfBirth, Gender = Gender.ToString(), Address = Address, CountryID = CountryID, ReceivesNewsLetters = ReceiveNewsLetters };
+            return new Person() { PersonID = PersonID, PersonName = PersonName, Email = Email, DateOfBirth = DateOfBirth, Gender = Gender.ToString(), Address = Address, CountryID = CountryID, ReceivesNewsLetters = ReceivesNewsLetters };
         }
     }
 }

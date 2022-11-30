@@ -1,5 +1,6 @@
 ﻿using Entities;
 using Microsoft.EntityFrameworkCore;
+using RepositoryContracts;
 using ServiceContracts;
 using ServiceContracts.DTO;
 
@@ -9,29 +10,11 @@ namespace Services
     {
         //In-Memory Collection
         //private readonly List<Country> _countries;
-        private readonly ApplicationDbContext _db;
+        private readonly ICountriesRepository _countriesRepository;
 
-
-        public CountriesService(ApplicationDbContext personsDbContext)
+        public CountriesService(ICountriesRepository countriesRepository)
         {
-            //_countries = new List<Country>();
-            _db = personsDbContext;
-
-            //Replaced by Seed Data
-            //if (initialize)
-            //{
-            //    _db.AddRange(new List<Country>() {
-            //        new Country() {  CountryID = Guid.Parse("000C76EB-62E9-4465-96D1-2C41FDB64C3B"), CountryName = "USA" },
-
-            //        new Country() { CountryID = Guid.Parse("32DA506B-3EBA-48A4-BD86-5F93A2E19E3F"), CountryName = "Canada" },
-
-            //        new Country() { CountryID = Guid.Parse("DF7C89CE-3341-4246-84AE-E01AB7BA476E"), CountryName = "UK" },
-
-            //        new Country() { CountryID = Guid.Parse("15889048-AF93-412C-B8F3-22103E943A6D"), CountryName = "India" },
-
-            //        new Country() { CountryID = Guid.Parse("80DF255C-EFE7-49E5-A7F9-C35D7C701CAB"), CountryName = "Australia" }
-            //    });
-            //}
+            _countriesRepository = countriesRepository;
         }
 
         public async Task<CountryResponse> AddCountry(CountryAddRequest? countryAddRequest)
@@ -48,7 +31,7 @@ namespace Services
 
             //use Any() instead of Count() here for performance 
             //using wait means same server thread is also serving other requests without being blocked and also waiting for db response
-            if (await _db.Countries.Where(country => country.CountryName == countryAddRequest.CountryName).AnyAsync())
+            if (await _countriesRepository.GetCountryByCountryName(countryAddRequest.CountryName) != null)
             {
                 throw new ArgumentException("Country name already exists");
             }
@@ -60,17 +43,16 @@ namespace Services
 
             Country country = countryAddRequest.ToCountry();
             country.CountryID = Guid.NewGuid();
-            _db.Countries.Add(country);
-
-            //Important to save our changes to db
-            await _db.SaveChangesAsync();
+            await _countriesRepository.AddCountry(country);
 
             return country.ToCountryResponse();
         }
 
         public async Task<List<CountryResponse>> GetAllCountries()
         {
-            return await _db.Countries.Select(country => country.ToCountryResponse()).ToListAsync();
+            List<Country> countries = await _countriesRepository.GetAllCountries();
+
+            return countries.Select(country => country.ToCountryResponse()).ToList();
         }
 
         public async Task<CountryResponse?> GetCountryById(Guid? Id)
@@ -80,7 +62,7 @@ namespace Services
                 return null;
             }
 
-            Country? country = await _db.Countries.FirstOrDefaultAsync(country => country.CountryID == Id);
+            Country? country = await _countriesRepository.GetCountryByCountryID(Id.Value);
 
             if (country == null)
             {

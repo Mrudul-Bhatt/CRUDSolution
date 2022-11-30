@@ -48,7 +48,7 @@ namespace ServiceContracts.DTO
 
         public PersonUpdateRequest ToPersonUpdateRequest()
         {
-            return new PersonUpdateRequest() { PersonID = PersonID, PersonName = PersonName, Email = Email, DateOfBirth = DateOfBirth, Gender = (GenderOptions)Enum.Parse(typeof(GenderOptions), Gender, true), Address = Address, CountryID = CountryID, ReceiveNewsLetters = ReceivesNewsLetters };
+            return new PersonUpdateRequest() { PersonID = PersonID, PersonName = PersonName, Email = Email, DateOfBirth = DateOfBirth, Gender = (GenderOptions)Enum.Parse(typeof(GenderOptions), Gender, true), Address = Address, CountryID = CountryID, ReceivesNewsLetters = ReceivesNewsLetters };
         }
     }
 
