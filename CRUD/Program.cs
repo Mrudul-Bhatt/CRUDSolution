@@ -4,6 +4,7 @@ using Repositories;
 using RepositoryContracts;
 using ServiceContracts;
 using Services;
+using CRUD.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,11 @@ app.UseHttpLogging();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandlingMiddleware();
 }
 
 app.UseStaticFiles();

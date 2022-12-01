@@ -1,5 +1,6 @@
 ﻿using System;
 using Entities;
+using Exceptions;
 using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 using ServiceContracts;
@@ -168,7 +169,7 @@ namespace Services
 
             if (matchingPerson == null)
             {
-                throw new ArgumentException("Given person id doesn't exist");
+                throw new InvalidPersonIDException("Given person id doesn't exist");
             }
 
             //update all details
