@@ -5,6 +5,8 @@ using RepositoryContracts;
 using ServiceContracts;
 using Services;
 using CRUD.Middleware;
+using IdentityEntities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,12 @@ builder.Services.AddScoped<IPersonsService, PersonsService>();
 //This is by default will be a Scoped Service
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//Enable Identity in this project
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
+                .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>();
 
 var app = builder.Build();
 

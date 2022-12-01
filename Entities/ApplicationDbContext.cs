@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 namespace Entities
 {
     //DbContext is present in NuGet Package Microsoft.EntityFrameworkCore.SqlServer, so in order to use it, we need to install it
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
         //This is the constructor of the class to provide the options we used in Program.cs (such as use SqlServer as DB) to Parent DbContext class
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
