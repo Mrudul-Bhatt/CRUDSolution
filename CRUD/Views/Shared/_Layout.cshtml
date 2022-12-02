@@ -13,13 +13,29 @@
             <div class="navbar-brand">
                 <img src="~/logo.png" width="25" asp-append-version="true" />
             </div>
+
             <ul>
-                <li>
-                    <a href="~/persons/index">Persons</a>
-                </li>
-                <li>
-                    <a href="~/account/register">Register</a>
-                </li>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li>
+                        <a asp-controller="Persons" asp-action="Index">Persons</a>
+                    </li>
+                    <li>
+                        @User.Identity?.Name
+                    </li>
+                    <l1>
+                        <a asp-controller="Account" asp-action="Logout">Logout</a>
+                    </l1>
+                }
+                else
+                {
+                    <li>
+                        <a asp-controller="Account" asp-action="Register">Register</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Account" asp-action="Login">Login</a>
+                    </li>
+                }
             </ul>
         </div>
 

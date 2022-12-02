@@ -7,6 +7,8 @@ using Services;
 using CRUD.Middleware;
 using IdentityEntities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,10 +45,32 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //Enable Identity in this project
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
-                .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>();
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+{
+    //Configure Password Complexity
+    options.Password.RequiredLength = 5;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireDigit = false;
+    options.Password.RequiredUniqueChars = 3;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders()
+.AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
+.AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>();
+
+builder.Services.AddAuthorization(options =>
+{
+    //enforces authorization policy (user must be authenticated) for all controllers and actions
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    //Cookie settings
+    options.LoginPath = "/Account/Login";
+});
 
 var app = builder.Build();
 
@@ -65,6 +89,21 @@ else
 }
 
 app.UseStaticFiles();
+
+//Identify action method based on route
+app.UseRouting();
+
+//enable authentication, this enables to reqcognize the user after signin
+//reads the identity info from cookie stored in browser
+//Ensures whether user is logged in or not
+app.UseAuthentication();
+
+//evaluates if the current user has access to a particular resource or not
+//validates access permission of user
+//Ensures whether user has permission to access a resource (action method) or not
+app.UseAuthorization();
+
+//Execute filter pipeline (action + filters)
 app.MapControllers();
 
 app.Run();

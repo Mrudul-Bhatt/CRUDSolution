@@ -15,4 +15,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\IdentityEntities\IdentityEntities.csproj" />
+  </ItemGroup>
+
 </Project>
